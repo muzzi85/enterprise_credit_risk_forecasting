@@ -1,0 +1,9 @@
+{
+    "mean_r2": 0.2503798051958702,
+    "mean_rmse": 0.19201544845529395,
+    "mean_mae": 0.15242518834088076,
+    "std_r2": 0.00442876846439285,
+    "features_count": 150,
+    "rows_count": 9028,
+    "categorical_count": 16
+}
