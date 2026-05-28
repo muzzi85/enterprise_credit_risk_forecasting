@@ -37,14 +37,9 @@ Predict the probability that a borrower defaults during the loan lifecycle.
 
 | Feature | Formula | Business Meaning | Customer Example |
 |---|---|---|---|
-| loan_to_income | `loan_amnt / annual_inc` | Measures borrower leverage relative to annual income. | `20000 / 100000 = 0.20` |
-| installment_income_ratio | `installment / monthly_income` | Measures monthly repayment affordability pressure. | `500 / 5000 = 0.10` |
-| revol_util_ratio | `revol_bal / total_rev_hi_lim` | Measures revolving credit utilization intensity. | `9000 / 10000 = 0.90` |
-| accounts_per_year | `total_acc / credit_history_years` | Measures speed of credit expansion. | `20 / 10 = 2 accounts/year` |
-| credit_hunger | `inq_last_6mths + acc_open_past_24mths` | Captures aggressive borrowing behavior. | `4 + 6 = 10` |
-| dti_per_fico | `dti / fico_score` | Measures debt burden adjusted for credit quality. | `20 / 650 = 0.031` |
-| long_term_stress | `term_months × installment_income_ratio` | Captures prolonged affordability stress. | `60 × 0.10 = 6.0` |
-| payment_stress_amplification | `installment_income_ratio × dti` | Measures compounded repayment pressure. | `0.10 × 20 = 2.0` |
+| loan_to_income | `loan_amnt / annual_inc` | loan_amnt represents the total loan requested by the borrower, while annual_inc represents the borrower annual income before taxes. This feature measures how large the requested loan is relative to the borrower earning capacity. Higher values indicate elevated leverage and greater repayment pressure. | loan_amnt = 20,000 ; annual_inc = 100,000 ; loan_to_income = 20,000 / 100,000 = 0.20 |
+| installment_income_ratio | `installment / monthly_income` | installment represents the required monthly repayment amount, while monthly_income represents the borrower monthly earnings. This feature measures the percentage of monthly income consumed by loan repayments and captures affordability stress. | installment = 500 ; monthly_income = 5,000 ; installment_income_ratio = 500 / 5,000 = 0.10 |
+| revol_util_ratio | `revol_bal / total_rev_hi_lim` | revol_bal represents the currently utilized revolving debt balance, while total_rev_hi_lim represents the maximum available revolving credit limit. This feature measures revolving credit utilization intensity and liquidity exhaustion. | revol_bal = 9,000 ; total_rev_hi_lim = 10,000 ; revol_util_ratio = 9,000 / 10,000 = 0.90 |
 
 ---
 
@@ -58,12 +53,8 @@ Predict the percentage financial loss incurred if borrower defaults.
 
 | Feature | Formula | Business Meaning | Customer Example |
 |---|---|---|---|
-| liquidity_exhaustion | `revol_bal / total_rev_hi_lim` | Measures exhaustion of available liquidity. | `9500 / 10000 = 0.95` |
-| debt_saturation | `total_bal_ex_mort / annual_inc` | Measures total debt pressure relative to income. | `70000 / 100000 = 0.70` |
-| revolving_dependency | `revol_bal / total_bal_ex_mort` | Measures dependence on revolving debt. | `20000 / 50000 = 0.40` |
-| fico_stress | `(revol_util × dti) / fico` | Measures financial stress adjusted for borrower quality. | `(90 × 20) / 650 = 2.77` |
-| borrower_complexity | `open_acc + num_rev_accts + num_il_tl` | Measures complexity of debt structure. | `12 + 8 + 5 = 25` |
-| credit_fatigue | `num_actv_rev_tl / credit_history_years` | Measures chronic leverage dependency. | `10 / 8 = 1.25` |
+| liquidity_exhaustion | `revol_bal / total_rev_hi_lim` | revol_bal represents utilized revolving credit, while total_rev_hi_lim represents the borrower total revolving credit capacity. This feature measures how exhausted borrower liquidity is before default and is strongly linked to recovery severity. | revol_bal = 9,500 ; total_rev_hi_lim = 10,000 ; liquidity_exhaustion = 9,500 / 10,000 = 0.95 |
+| debt_saturation | `total_bal_ex_mort / annual_inc` | total_bal_ex_mort represents total outstanding debt excluding mortgage balances, while annual_inc represents borrower annual income. This feature measures how saturated the borrower balance sheet is relative to repayment capacity. | total_bal_ex_mort = 70,000 ; annual_inc = 100,000 ; debt_saturation = 70,000 / 100,000 = 0.70 |
 
 ---
 
@@ -77,12 +68,8 @@ Predict remaining exposure when borrower defaults.
 
 | Feature | Formula | Business Meaning | Customer Example |
 |---|---|---|---|
-| EAD_ratio | `out_prncp / funded_amnt` | Measures remaining normalized exposure at default. | `8000 / 10000 = 0.80` |
-| installment_per_loan | `installment / loan_amnt` | Measures repayment velocity. | `300 / 10000 = 0.03` |
-| exposure_pressure | `loan_amnt × revol_util` | Measures leveraged exposure intensity. | `10000 × 0.90 = 9000` |
-| exposure_income_stress | `(loan_amnt × dti) / annual_inc` | Measures affordability-adjusted exposure. | `(10000 × 20) / 100000 = 2.0` |
-| term_installment_pressure | `term_months × installment` | Measures cumulative repayment burden. | `60 × 300 = 18000` |
-| leverage_acceleration | `revol_util × inquiries × recent_accounts` | Measures accelerating debt expansion. | `90 × 4 × 3 = 1080` |
+| EAD_ratio | `out_prncp / funded_amnt` | out_prncp represents the remaining unpaid principal balance at default, while funded_amnt represents the original funded loan amount. This feature measures the percentage exposure still outstanding when default occurs. | out_prncp = 8,000 ; funded_amnt = 10,000 ; EAD_ratio = 8,000 / 10,000 = 0.80 |
+| installment_per_loan | `installment / loan_amnt` | installment represents monthly repayment amount, while loan_amnt represents original loan size. This feature measures repayment velocity and amortization speed of the loan structure. | installment = 300 ; loan_amnt = 10,000 ; installment_per_loan = 300 / 10,000 = 0.03 |
 
 ---
 
@@ -94,29 +81,6 @@ Predict remaining exposure when borrower defaults.
 - CatBoost
 - Scikit-Learn
 - Jupyter
-
----
-
-# Validation Methodology
-
-- Stratified K-Fold Cross Validation
-- Out-of-Fold Predictions
-- ROC-AUC
-- PR-AUC
-- RMSE
-- MAE
-- R²
-
----
-
-# Future Roadmap
-
-- Expected Loss Engine
-- Pricing Optimization
-- Behavioral Risk Monitoring
-- IFRS9 Lifetime PD
-- Stress Testing
-- Collections Optimization
 
 ---
 
