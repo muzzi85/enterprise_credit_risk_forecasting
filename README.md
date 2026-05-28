@@ -1,4 +1,240 @@
 # Enterprise Credit Risk Forecasting
+# Model Architecture, Training Strategy, and Results
+
+## 1. Probability of Default (PD) Model
+
+### Business Objective
+
+The Probability of Default (PD) model estimates the likelihood that a borrower will fail to repay the loan and enter default status during the loan lifecycle. The model is designed for underwriting-stage risk assessment using only origination-time information.
+
+---
+
+### Modeling Framework
+
+| Component           | Description                                                      |
+| ------------------- | ---------------------------------------------------------------- |
+| Model Type          | Binary Classification                                            |
+| Algorithm           | CatBoostClassifier                                               |
+| Target Variable     | TARGET (1 = Default, 0 = Non-Default)                            |
+| Validation Strategy | Stratified 5-Fold Cross Validation                               |
+| Optimization Metric | PR-AUC and ROC-AUC                                               |
+| Imbalance Handling  | Auto Class Weights / Balanced Loss                               |
+| Feature Engineering | Advanced enterprise credit risk ratios and interaction variables |
+| Leakage Protection  | Post-default and future repayment variables removed              |
+
+---
+
+### Feature Engineering Categories
+
+The PD model includes engineered features across:
+
+* Borrower affordability
+* Credit utilization
+* Liquidity pressure
+* Credit expansion velocity
+* Delinquency intensity
+* Repayment burden
+* Long-term leverage stress
+* Credit structure complexity
+* FICO-adjusted leverage metrics
+
+---
+
+### Model Training Strategy
+
+The model was trained using:
+
+* Stratified K-Fold validation to preserve default distribution
+* Out-of-fold prediction generation
+* CatBoost native categorical handling
+* Hyperparameter optimization
+* PR-AUC optimization to improve minority default detection
+* Threshold optimization for business risk calibration
+
+---
+
+### PD Model Results
+
+| Metric                 | Value             |
+| ---------------------- | ----------------- |
+| Mean ROC-AUC           | 0.7367            |
+| Mean PR-AUC            | 0.4486            |
+| Cross-Validation Folds | 5                 |
+| Validation Strategy    | Stratified K-Fold |
+| Dataset Size           | 44,006 loans      |
+| Engineered Features    | 142               |
+
+---
+
+### Threshold Performance Matrix
+
+| Threshold | Precision | Recall |
+| --------- | --------- | ------ |
+| 0.30      | 0.259     | 0.928  |
+| 0.40      | 0.293     | 0.819  |
+| 0.50      | 0.346     | 0.682  |
+| 0.60      | 0.394     | 0.478  |
+| 0.70      | 0.488     | 0.311  |
+
+---
+
+### Business Interpretation
+
+The PD model successfully captures borrower default behavior using enterprise-style leverage, utilization, affordability, and credit structure features. The model prioritizes high recall at lower thresholds to minimize missed default events while maintaining acceptable precision levels for underwriting operations.
+
+---
+
+# 2. Loss Given Default (LGD) Model
+
+### Business Objective
+
+The Loss Given Default (LGD) model estimates the percentage financial loss incurred if a borrower defaults. The model focuses on recovery severity and post-default economic exposure.
+
+---
+
+### Modeling Framework
+
+| Component           | Description                                                          |
+| ------------------- | -------------------------------------------------------------------- |
+| Model Type          | Regression                                                           |
+| Algorithm           | CatBoostRegressor                                                    |
+| Target Variable     | LGD                                                                  |
+| Validation Strategy | 5-Fold Cross Validation                                              |
+| Optimization Metric | RMSE / R²                                                            |
+| Feature Engineering | Recovery severity and liquidity stress variables                     |
+| Leakage Protection  | Recovery, settlement, and post-default operational variables removed |
+
+---
+
+### Feature Engineering Categories
+
+The LGD model includes engineered features across:
+
+* Liquidity exhaustion
+* Debt saturation
+* Revolving dependency
+* Financial stress amplification
+* Borrower complexity
+* Credit fatigue
+* Recovery sensitivity
+* Structural leverage persistence
+
+---
+
+### Model Training Strategy
+
+The model was trained using:
+
+* K-Fold regression validation
+* Continuous bounded target modeling
+* Heavy regularization to stabilize regression outputs
+* CatBoost native categorical encoding
+* Feature interaction engineering
+* Exposure and recovery behavior modeling
+
+---
+
+### LGD Model Results
+
+| Metric              | Value                   |
+| ------------------- | ----------------------- |
+| Validation Strategy | 5-Fold Cross Validation |
+| Model Type          | Regression              |
+| Loss Function       | RMSE                    |
+| Engineered Features | 150+                    |
+| Training Dataset    | Defaulted Loans Only    |
+
+---
+
+### Business Interpretation
+
+The LGD model captures how severe losses become after borrower default by modeling borrower liquidity exhaustion, leverage dependency, debt complexity, and repayment sustainability. The model provides an enterprise-style recovery severity estimation framework.
+
+---
+
+# 3. Exposure at Default (EAD) Model
+
+### Business Objective
+
+The Exposure at Default (EAD) model estimates the remaining loan exposure outstanding when borrower default occurs.
+
+---
+
+### Modeling Framework
+
+| Component           | Description                                                       |
+| ------------------- | ----------------------------------------------------------------- |
+| Model Type          | Regression                                                        |
+| Algorithm           | CatBoostRegressor                                                 |
+| Target Variable     | EAD Ratio                                                         |
+| Validation Strategy | 5-Fold Cross Validation                                           |
+| Optimization Metric | RMSE / R²                                                         |
+| Feature Engineering | Amortization and exposure persistence variables                   |
+| Leakage Protection  | Remaining principal and post-default collection variables removed |
+
+---
+
+### Feature Engineering Categories
+
+The EAD model includes engineered features across:
+
+* Amortization dynamics
+* Exposure persistence
+* Installment pressure
+* Repayment velocity
+* Utilization expansion
+* Credit acceleration
+* Exposure stress amplification
+* Borrower leverage sustainability
+
+---
+
+### Model Training Strategy
+
+The model was trained using:
+
+* K-Fold regression validation
+* Exposure ratio normalization
+* Bounded prediction clipping
+* CatBoost native categorical processing
+* Advanced exposure interaction engineering
+* Liquidity and repayment burden modeling
+
+---
+
+### EAD Model Results
+
+| Metric              | Value                    |
+| ------------------- | ------------------------ |
+| Validation Strategy | 5-Fold Cross Validation  |
+| Model Type          | Regression               |
+| Engineered Features | 150+                     |
+| Target              | Remaining Exposure Ratio |
+| Dataset             | Defaulted Loans Only     |
+
+---
+
+### Business Interpretation
+
+The EAD model captures how much exposure remains outstanding when borrower failure occurs. The model focuses on amortization structure, repayment burden, leverage expansion, and exposure persistence dynamics.
+
+---
+
+# Enterprise Expected Loss Framework
+
+The final enterprise risk framework integrates all three models:
+
+Expected Loss (EL):
+
+EL = PD × LGD × EAD
+
+Where:
+
+* PD estimates probability of borrower default
+* LGD estimates severity of financial loss
+* EAD estimates remaining exposure at failure
+
+This creates a full enterprise-grade credit risk forecasting architecture suitable for underwriting, portfolio risk estimation, and future pricing optimization systems.
 
 # PD Features
 
