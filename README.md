@@ -1,232 +1,168 @@
 
 # Enterprise Credit Risk Forecasting
 
-Enterprise-grade credit risk modeling framework implementing:
+Enterprise-grade credit risk platform implementing:
 
 - Probability of Default (PD)
 - Loss Given Default (LGD)
 - Exposure at Default (EAD)
 
-using advanced feature engineering and CatBoost-based machine learning pipelines.
+using advanced feature engineering and CatBoost machine learning pipelines.
 
 ---
 
-# Enterprise Credit Risk Architecture
+# Enterprise Risk Formula
 
-<div align="center">
-
-| Component | Business Question | Output |
-|---|---|---|
-| PD | Will the borrower default? | Default Probability |
-| LGD | If default occurs, how severe is the loss? | Loss Severity |
-| EAD | How much exposure remains at default? | Remaining Exposure |
-
-</div>
-
----
-
-# Expected Loss Framework
+Expected Loss (EL):
 
 EL = PD × LGD × EAD
 
 ---
 
-# 1. Probability of Default (PD)
+# Model Architecture
 
-## Business Objective
-
-Predict the probability that a borrower will default at loan origination.
-
----
-
-## PD Feature Engineering Dictionary
-
-<table>
-<tr>
-<th>Feature</th>
-<th>Mathematical Formula</th>
-<th>Business Meaning</th>
-<th>Example</th>
-</tr>
-
-<tr>
-<td><b>loan_to_income</b></td>
-<td>loan_amnt / annual_inc</td>
-<td>Measures borrower leverage relative to annual income.</td>
-<td>£20k loan / £100k income = 0.20</td>
-</tr>
-
-<tr>
-<td><b>installment_to_income</b></td>
-<td>installment / monthly_income</td>
-<td>Measures monthly repayment burden.</td>
-<td>£500 installment / £5000 income = 10%</td>
-</tr>
-
-<tr>
-<td><b>dti_per_fico</b></td>
-<td>dti / fico_score</td>
-<td>Measures debt burden adjusted for credit quality.</td>
-<td>High DTI + weak FICO = elevated risk</td>
-</tr>
-
-<tr>
-<td><b>credit_hunger</b></td>
-<td>inquiries + recent_accounts</td>
-<td>Captures aggressive borrowing behavior.</td>
-<td>Many recent credit applications</td>
-</tr>
-
-<tr>
-<td><b>utilization_shock_risk</b></td>
-<td>revol_util × recent_trades</td>
-<td>Captures rapid leverage expansion.</td>
-<td>90% utilization + multiple new trades</td>
-</tr>
-
-<tr>
-<td><b>long_term_stress</b></td>
-<td>term_months × installment_to_income</td>
-<td>Measures long-duration repayment stress.</td>
-<td>Long-term high payment burden</td>
-</tr>
-
-<tr>
-<td><b>payment_stress_amplification</b></td>
-<td>installment_to_income × dti</td>
-<td>Captures combined affordability pressure.</td>
-<td>High installment burden + high DTI</td>
-</tr>
-
-</table>
+| Model | Objective |
+|---|---|
+| PD | Predict borrower default probability |
+| LGD | Predict severity of loss if default occurs |
+| EAD | Predict remaining exposure at default |
 
 ---
 
-# 2. Loss Given Default (LGD)
 
-## Business Objective
+# PD Feature Dictionary
 
-Predict the percentage financial loss incurred if default occurs.
-
----
-
-## LGD Feature Engineering Dictionary
-
-<table>
-<tr>
-<th>Feature</th>
-<th>Mathematical Formula</th>
-<th>Business Meaning</th>
-<th>Example</th>
-</tr>
-
-<tr>
-<td><b>liquidity_exhaustion</b></td>
-<td>revol_bal / total_rev_hi_lim</td>
-<td>Measures exhaustion of available revolving liquidity.</td>
-<td>£9k used from £10k limit = 90%</td>
-</tr>
-
-<tr>
-<td><b>debt_saturation</b></td>
-<td>total_bal_ex_mort / annual_inc</td>
-<td>Measures total debt pressure relative to income.</td>
-<td>Heavy debt relative to salary</td>
-</tr>
-
-<tr>
-<td><b>revolving_dependency</b></td>
-<td>revol_bal / total_bal_ex_mort</td>
-<td>Measures dependence on revolving credit.</td>
-<td>Borrower mainly relies on credit cards</td>
-</tr>
-
-<tr>
-<td><b>fico_stress</b></td>
-<td>revol_util × dti / fico</td>
-<td>Measures stress adjusted for borrower quality.</td>
-<td>Weak FICO + high utilization</td>
-</tr>
-
-<tr>
-<td><b>borrower_complexity</b></td>
-<td>open_acc + rev_accounts + installment_accounts</td>
-<td>Measures structural complexity of debt portfolio.</td>
-<td>Many fragmented debt products</td>
-</tr>
-
-<tr>
-<td><b>credit_fatigue</b></td>
-<td>active_revolving_trades / history_years</td>
-<td>Measures chronic long-term leverage usage.</td>
-<td>Persistent revolving debt behavior</td>
-</tr>
-
-</table>
+| Feature | Formula Type | Business Meaning |
+|---|---|---|
+| accounts_per_year | Derived engineered feature | Credit structure and account behavior metric |
+| all_util_ratio | Derived engineered feature | Credit utilization and liquidity pressure metric |
+| bc_util_ratio | Derived engineered feature | Credit utilization and liquidity pressure metric |
+| credit_history_months | Derived engineered feature | Credit History Months |
+| credit_hunger | Derived engineered feature | Credit Hunger |
+| delinq_intensity | Derived engineered feature | Historical delinquency intensity metric |
+| emp_length_years | Derived engineered feature | Emp Length Years |
+| emp_title_clean | Derived engineered feature | Emp Title Clean |
+| expected_loss | Derived engineered feature | Expected Loss |
+| installment_income_ratio | Derived engineered feature | Income affordability and repayment capacity indicator |
+| issue_month | Derived engineered feature | Issue Month |
+| issue_quarter | Derived engineered feature | Issue Quarter |
+| issue_year | Derived engineered feature | Issue Year |
+| job_cluster | Derived engineered feature | Job Cluster |
+| loan_age_proxy | Derived engineered feature | Loan Age Proxy |
+| loan_income_ratio | Derived engineered feature | Income affordability and repayment capacity indicator |
+| recovery_rate | Derived engineered feature | Recovery Rate |
+| remaining_exposure | Derived engineered feature | Exposure and remaining balance risk metric |
+| revol_util_ratio | Derived engineered feature | Credit utilization and liquidity pressure metric |
+| stress_score | Derived engineered feature | Financial stress and leverage pressure indicator |
+| term_months | Derived engineered feature | Long-term repayment structure metric |
+| zip_region | Derived engineered feature | Zip Region |
 
 ---
 
-# 3. Exposure at Default (EAD)
 
-## Business Objective
+# LGD Feature Dictionary
 
-Predict remaining loan exposure when default occurs.
+| Feature | Formula Type | Business Meaning |
+|---|---|---|
+| account_fragmentation | Derived engineered feature | Credit structure and account behavior metric |
+| active_trade_ratio | Derived engineered feature | Credit structure and account behavior metric |
+| avg_account_age | Derived engineered feature | Credit structure and account behavior metric |
+| bcutil_dti_stress | Derived engineered feature | Financial stress and leverage pressure indicator |
+| borrower_complexity | Derived engineered feature | Borrower Complexity |
+| credit_fatigue | Derived engineered feature | Credit Fatigue |
+| credit_history_months | Derived engineered feature | Credit History Months |
+| credit_hunger | Derived engineered feature | Credit Hunger |
+| credit_resilience | Derived engineered feature | Credit Resilience |
+| credit_velocity | Derived engineered feature | Credit expansion speed metric |
+| debt_saturation | Derived engineered feature | Debt Saturation |
+| delinq_intensity | Derived engineered feature | Historical delinquency intensity metric |
+| derogatory_pressure | Derived engineered feature | Derogatory Pressure |
+| dti_per_fico | Derived engineered feature | Credit quality adjusted risk metric |
+| emp_length_years | Derived engineered feature | Emp Length Years |
+| fico_stress | Derived engineered feature | Financial stress and leverage pressure indicator |
+| inq_per_year | Derived engineered feature | Inq Per Year |
+| installment_to_income | Derived engineered feature | Income affordability and repayment capacity indicator |
+| installment_trade_share | Derived engineered feature | Credit structure and account behavior metric |
+| issue_month | Derived engineered feature | Issue Month |
+| issue_quarter | Derived engineered feature | Issue Quarter |
+| issue_year | Derived engineered feature | Issue Year |
+| leverage_acceleration | Derived engineered feature | Leverage Acceleration |
+| liquidity_exhaustion | Derived engineered feature | Liquidity Exhaustion |
+| loan_per_fico | Derived engineered feature | Credit quality adjusted risk metric |
+| loan_to_income | Derived engineered feature | Income affordability and repayment capacity indicator |
+| long_term_stress | Derived engineered feature | Financial stress and leverage pressure indicator |
+| monthly_income | Derived engineered feature | Income affordability and repayment capacity indicator |
+| open_account_ratio | Derived engineered feature | Credit structure and account behavior metric |
+| payment_stress_amplification | Derived engineered feature | Financial stress and leverage pressure indicator |
+| recent_account_pressure | Derived engineered feature | Credit structure and account behavior metric |
+| remaining_bc_capacity | Derived engineered feature | Remaining Bc Capacity |
+| remaining_revolving_capacity | Derived engineered feature | Remaining Revolving Capacity |
+| revolving_dependency | Derived engineered feature | Borrower leverage dependency indicator |
+| revolving_to_income | Derived engineered feature | Income affordability and repayment capacity indicator |
+| revolving_trade_share | Derived engineered feature | Credit structure and account behavior metric |
+| term_loan_burden | Derived engineered feature | Long-term repayment structure metric |
+| term_months | Derived engineered feature | Long-term repayment structure metric |
+| trade_density | Derived engineered feature | Credit structure and account behavior metric |
+| util_per_account | Derived engineered feature | Credit utilization and liquidity pressure metric |
+| utilization_dti_stress | Derived engineered feature | Financial stress and leverage pressure indicator |
+| utilization_per_fico | Derived engineered feature | Credit utilization and liquidity pressure metric |
+| utilization_shock_risk | Derived engineered feature | Credit utilization and liquidity pressure metric |
 
 ---
 
-## EAD Feature Engineering Dictionary
 
-<table>
-<tr>
-<th>Feature</th>
-<th>Mathematical Formula</th>
-<th>Business Meaning</th>
-<th>Example</th>
-</tr>
+# EAD Feature Dictionary
 
-<tr>
-<td><b>EAD_ratio</b></td>
-<td>out_prncp / funded_amnt</td>
-<td>Normalized remaining exposure at default.</td>
-<td>£8k remaining / £10k funded = 80%</td>
-</tr>
-
-<tr>
-<td><b>installment_per_loan</b></td>
-<td>installment / loan_amnt</td>
-<td>Measures repayment velocity.</td>
-<td>Higher payments reduce exposure faster</td>
-</tr>
-
-<tr>
-<td><b>exposure_pressure</b></td>
-<td>loan_amnt × revol_util</td>
-<td>Measures leveraged exposure intensity.</td>
-<td>Large loan combined with high utilization</td>
-</tr>
-
-<tr>
-<td><b>exposure_income_stress</b></td>
-<td>loan_amnt × dti / income</td>
-<td>Measures affordability-adjusted exposure.</td>
-<td>High debt relative to repayment ability</td>
-</tr>
-
-<tr>
-<td><b>term_installment_pressure</b></td>
-<td>term_months × installment</td>
-<td>Captures cumulative repayment burden.</td>
-<td>Long-term repayment pressure</td>
-</tr>
-
-<tr>
-<td><b>leverage_acceleration</b></td>
-<td>utilization × inquiries × recent_accounts</td>
-<td>Captures accelerating debt expansion behavior.</td>
-<td>Rapid debt accumulation</td>
-</tr>
-
-</table>
+| Feature | Formula Type | Business Meaning |
+|---|---|---|
+| EAD_ratio | Derived engineered feature | Ead Ratio |
+| account_fragmentation | Derived engineered feature | Credit structure and account behavior metric |
+| active_trade_ratio | Derived engineered feature | Credit structure and account behavior metric |
+| avg_account_age | Derived engineered feature | Credit structure and account behavior metric |
+| bcutil_dti_stress | Derived engineered feature | Financial stress and leverage pressure indicator |
+| borrower_complexity | Derived engineered feature | Borrower Complexity |
+| credit_fatigue | Derived engineered feature | Credit Fatigue |
+| credit_history_months | Derived engineered feature | Credit History Months |
+| credit_hunger | Derived engineered feature | Credit Hunger |
+| credit_resilience | Derived engineered feature | Credit Resilience |
+| credit_velocity | Derived engineered feature | Credit expansion speed metric |
+| debt_saturation | Derived engineered feature | Debt Saturation |
+| delinq_intensity | Derived engineered feature | Historical delinquency intensity metric |
+| derogatory_pressure | Derived engineered feature | Derogatory Pressure |
+| dti_per_fico | Derived engineered feature | Credit quality adjusted risk metric |
+| emp_length_years | Derived engineered feature | Emp Length Years |
+| exposure_income_stress | Derived engineered feature | Income affordability and repayment capacity indicator |
+| exposure_pressure | Derived engineered feature | Exposure and remaining balance risk metric |
+| fico_stress | Derived engineered feature | Financial stress and leverage pressure indicator |
+| inq_per_year | Derived engineered feature | Inq Per Year |
+| installment_per_loan | Derived engineered feature | Installment Per Loan |
+| installment_to_income | Derived engineered feature | Income affordability and repayment capacity indicator |
+| installment_trade_share | Derived engineered feature | Credit structure and account behavior metric |
+| issue_month | Derived engineered feature | Issue Month |
+| issue_quarter | Derived engineered feature | Issue Quarter |
+| issue_year | Derived engineered feature | Issue Year |
+| leverage_acceleration | Derived engineered feature | Leverage Acceleration |
+| liquidity_exhaustion | Derived engineered feature | Liquidity Exhaustion |
+| loan_per_fico | Derived engineered feature | Credit quality adjusted risk metric |
+| loan_to_income | Derived engineered feature | Income affordability and repayment capacity indicator |
+| long_term_stress | Derived engineered feature | Financial stress and leverage pressure indicator |
+| monthly_income | Derived engineered feature | Income affordability and repayment capacity indicator |
+| open_account_ratio | Derived engineered feature | Credit structure and account behavior metric |
+| payment_stress_amplification | Derived engineered feature | Financial stress and leverage pressure indicator |
+| recent_account_pressure | Derived engineered feature | Credit structure and account behavior metric |
+| remaining_bc_capacity | Derived engineered feature | Remaining Bc Capacity |
+| remaining_revolving_capacity | Derived engineered feature | Remaining Revolving Capacity |
+| revolving_dependency | Derived engineered feature | Borrower leverage dependency indicator |
+| revolving_to_income | Derived engineered feature | Income affordability and repayment capacity indicator |
+| revolving_trade_share | Derived engineered feature | Credit structure and account behavior metric |
+| term_installment_pressure | Derived engineered feature | Long-term repayment structure metric |
+| term_loan_burden | Derived engineered feature | Long-term repayment structure metric |
+| term_months | Derived engineered feature | Long-term repayment structure metric |
+| trade_density | Derived engineered feature | Credit structure and account behavior metric |
+| util_per_account | Derived engineered feature | Credit utilization and liquidity pressure metric |
+| utilization_dti_stress | Derived engineered feature | Financial stress and leverage pressure indicator |
+| utilization_per_fico | Derived engineered feature | Credit utilization and liquidity pressure metric |
+| utilization_shock_risk | Derived engineered feature | Credit utilization and liquidity pressure metric |
 
 ---
 
@@ -241,7 +177,7 @@ Predict remaining loan exposure when default occurs.
 
 ---
 
-# Validation Methodology
+# Validation Framework
 
 - Stratified K-Fold Cross Validation
 - Out-of-Fold Predictions
@@ -257,7 +193,7 @@ Predict remaining loan exposure when default occurs.
 
 - Expected Loss Engine
 - Pricing Optimization
-- Behavioral Monitoring Models
+- Behavioral Risk Monitoring
 - Stress Testing
 - IFRS9 Lifetime Risk
 - Collections Optimization
